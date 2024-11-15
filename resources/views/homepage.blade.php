@@ -177,6 +177,9 @@
             
             .hero-content .d-flex {
                 justify-content: center;
+                gap: 15px;
+                width: 100%;
+                align-items: center;
             }
             
             .service-card {
@@ -186,6 +189,22 @@
             .btn-light, .btn-outline-light {
                 padding: 10px 20px;
                 font-size: 0.9rem;
+            }
+            
+            .btn-large {
+                padding: 12px 24px;
+                font-size: 1rem;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                min-width: 140px;
+            }
+            
+            .hero-content .d-flex {
+                justify-content: center;
+                gap: 15px;
+                width: 100%;
+                align-items: center;
             }
         }
 
@@ -240,16 +259,21 @@
                 justify-content: center;
                 flex-direction: row !important;
                 flex-wrap: nowrap !important;
-                gap: 8px !important;
+                gap: 12px !important;
+                width: 100%;
+                align-items: center;
             }
             
             .btn-light, .btn-outline-light {
                 width: auto !important;
                 margin: 0 !important;
-                padding: 8px 12px !important;
-                font-size: 0.8rem !important;
+                padding: 10px 20px !important;
+                font-size: 1rem !important;
                 white-space: nowrap;
-                min-width: 0 !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                min-width: 130px;
             }
             
             .hero-content h1 {
@@ -259,6 +283,16 @@
             .hero-content .lead {
                 font-size: 0.9rem;
                 margin-bottom: 1.5rem !important;
+            }
+            
+            .btn-large {
+                padding: 10px 20px !important;
+                font-size: 1rem !important;
+                white-space: nowrap;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                min-width: 130px;
             }
         }
 
@@ -281,8 +315,13 @@
         }
 
         .btn-large {
-            padding: 15px 30px;
-            font-size: 1.25rem;
+            padding: 12px 24px;
+            font-size: 1rem;
+            text-align: center;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 160px;
         }
 
         .client-slider-container {
@@ -510,8 +549,21 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-lg-6 hero-content order-2 order-lg-1">
-                    <h1 class="fw-bold mb-4" style="font-size: 2.7rem;">Digitalisasi Bisnis Anda</h1>
-                    <p class="lead mb-4">Mengefisiensikan Bisnis Anda dengan menjadikannya terstruktur, termonitor dan tepat sasaran dengan teknologi terkini dan user friendly</p>
+                    @php
+                        $heroContent = \App\Models\HeroContent::first();
+                    @endphp
+
+                    <h1 class="fw-bold mb-4" style="font-size: 3rem;">
+                        {{ $heroContent?->title ?? 'Belum di konfigurasi' }}
+                        @auth
+                            <a href="#" class="ms-2 text-white" style="font-size: 1rem;" data-bs-toggle="modal" data-bs-target="#heroContentModal">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                        @endauth
+                    </h1>
+                    <p class="lead mb-4">
+                        {{ $heroContent?->description ?? 'Belum di konfigurasi' }}
+                    </p>
                     <div class="d-flex gap-3">
                         <a href="#kontak" class="btn btn-light btn-lg px-4 btn-large">Mulai Sekarang</a>
                         <a href="#layanan" class="btn btn-outline-light btn-lg px-4 btn-large">Pelajari Lebih Lanjut</a>
@@ -805,7 +857,7 @@
     </div>
 
     <div class="modal fade" id="manageSliderModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Kelola Slider</h5>
@@ -890,6 +942,123 @@
         </div>
     </div>
 
+    <div class="modal fade" id="heroContentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Hero Content</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="{{ route('hero-content.update') }}" method="POST">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Title</label>
+                            <input type="text" class="form-control" name="title" 
+                                   value="{{ $heroContent?->title }}" 
+                                   required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" name="description" rows="3" required>{{ $heroContent?->description }}</textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="manageClientModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Kelola Client</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" onclick="refreshPage()"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="uploadClientForm" action="{{ route('clientslider.store') }}" method="POST" enctype="multipart/form-data" class="mb-4">
+                        @csrf
+                        <div class="row align-items-end">
+                            <div class="col-md-8">
+                                <label class="form-label">Tambah Logo Client</label>
+                                <input type="file" class="form-control" name="images[]" required accept="image/*" multiple>
+                                <small class="text-muted">Ukuran maksimal: 2MB per file. Format: JPG, PNG, GIF. Bisa pilih lebih dari 1 file.</small>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-plus-circle me-2"></i>Upload
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <hr class="my-4">
+
+                    <h6 class="mb-3">Daftar Logo Client</h6>
+                    <div class="row g-3">
+                        @forelse($clientSliders as $client)
+                            <div class="col-md-4" data-client-id="{{ $client->id }}">
+                                <div class="card h-100">
+                                    <div class="position-relative">
+                                        <img src="{{ asset('storage/' . $client->image) }}" 
+                                             class="card-img-top p-2" 
+                                             alt="Client Logo"
+                                             style="height: 100px; object-fit: contain;">
+                                        <button class="btn btn-sm btn-warning position-absolute top-0 end-0 m-2" 
+                                                onclick="deleteClient({{ $client->id }})"
+                                                title="Hapus Client">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                    <div class="card-footer bg-light">
+                                        <small class="text-muted">
+                                            Ditambahkan: {{ $client->created_at->diffForHumans(['parts' => 1, 'join' => ' ', 'syntax' => \Carbon\CarbonInterface::DIFF_RELATIVE_TO_NOW]) }}
+                                        </small>
+                                    </div>
+                                </div>
+                                <form id="delete-client-form-{{ $client->id }}" 
+                                      action="{{ route('clientslider.destroy', $client->id) }}" 
+                                      method="POST" 
+                                      style="display: none;">
+                                    @csrf
+                                    @method('DELETE')
+                                </form>
+                            </div>
+                        @empty
+                            <div class="col-12">
+                                <div class="alert alert-info mb-0">
+                                    Belum ada logo client. Silakan tambahkan logo baru.
+                                </div>
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deleteClientConfirmationModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Konfirmasi Hapus</h5>
+                    <!-- <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> -->
+                </div>
+                <div class="modal-body">
+                    <p>Apakah Anda yakin ingin menghapus logo client ini?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteClient">Hapus</button>
+                </div>
+            </div>
+        </div>
+    </div>
+<!-- batas html -->
     <script>
     let currentSliderId = null;
     let deleteModal = null;
@@ -1100,93 +1269,6 @@
     });
     </script>
 
-    <div class="modal fade" id="manageClientModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Kelola Client</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" onclick="refreshPage()"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="uploadClientForm" action="{{ route('clientslider.store') }}" method="POST" enctype="multipart/form-data" class="mb-4">
-                        @csrf
-                        <div class="row align-items-end">
-                            <div class="col-md-8">
-                                <label class="form-label">Tambah Logo Client</label>
-                                <input type="file" class="form-control" name="images[]" required accept="image/*" multiple>
-                                <small class="text-muted">Ukuran maksimal: 2MB per file. Format: JPG, PNG, GIF. Bisa pilih lebih dari 1 file.</small>
-                            </div>
-                            <div class="col-md-4">
-                                <button type="submit" class="btn btn-primary w-100">
-                                    <i class="bi bi-plus-circle me-2"></i>Upload
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-
-                    <hr class="my-4">
-
-                    <h6 class="mb-3">Daftar Logo Client</h6>
-                    <div class="row g-3">
-                        @forelse($clientSliders as $client)
-                            <div class="col-md-4" data-client-id="{{ $client->id }}">
-                                <div class="card h-100">
-                                    <div class="position-relative">
-                                        <img src="{{ asset('storage/' . $client->image) }}" 
-                                             class="card-img-top p-2" 
-                                             alt="Client Logo"
-                                             style="height: 100px; object-fit: contain;">
-                                        <button class="btn btn-sm btn-warning position-absolute top-0 end-0 m-2" 
-                                                onclick="deleteClient({{ $client->id }})"
-                                                title="Hapus Client">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </div>
-                                    <div class="card-footer bg-light">
-                                        <small class="text-muted">
-                                            Ditambahkan: {{ $client->created_at->diffForHumans(['parts' => 1, 'join' => ' ', 'syntax' => \Carbon\CarbonInterface::DIFF_RELATIVE_TO_NOW]) }}
-                                        </small>
-                                    </div>
-                                </div>
-                                <form id="delete-client-form-{{ $client->id }}" 
-                                      action="{{ route('clientslider.destroy', $client->id) }}" 
-                                      method="POST" 
-                                      style="display: none;">
-                                    @csrf
-                                    @method('DELETE')
-                                </form>
-                            </div>
-                        @empty
-                            <div class="col-12">
-                                <div class="alert alert-info mb-0">
-                                    Belum ada logo client. Silakan tambahkan logo baru.
-                                </div>
-                            </div>
-                        @endforelse
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="deleteClientConfirmationModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Konfirmasi Hapus</h5>
-                    <!-- <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> -->
-                </div>
-                <div class="modal-body">
-                    <p>Apakah Anda yakin ingin menghapus logo client ini?</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="button" class="btn btn-danger" id="confirmDeleteClient">Hapus</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script>
     let currentClientId = null;
     let deleteClientModal = null;
@@ -1291,6 +1373,62 @@
         deleteClientModal.hide();
         currentClientId = null;
     }
+    </script>
+
+    <script>
+    document.querySelector('#heroContentModal form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        fetch(this.action, {
+            method: 'POST',
+            body: new FormData(this),
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Tutup modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('heroContentModal'));
+                modal.hide();
+                
+                // Refresh halaman
+                window.location.reload();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
+    </script>
+
+    <script>
+    document.querySelector('#heroContentModal form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        fetch(this.action, {
+            method: 'POST',
+            body: new FormData(this),
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Tutup modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('heroContentModal'));
+                modal.hide();
+                
+                // Refresh halaman
+                window.location.reload();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
     </script>
 </body>
 </html>
